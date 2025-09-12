@@ -6,9 +6,9 @@ As part of `Deliverable ⓵ Development deployment: JWT Pizza`, start up the app
 
 | User activity                                       | Frontend component | Backend endpoints | Database SQL |
 | --------------------------------------------------- | ------------------ | ----------------- | ------------ |
-| View home page                                      |   home.jsx    |      _none_             |  _none_            |
-| Register new user<br/>(t@jwt.com, pw: test)         |   register.jsx         |  [POST] /api/auth     |              |
-| Login new user<br/>(t@jwt.com, pw: test)            |                    |                   |              |
+| View home page                                      |   home.tsx    |      _none_             |  _none_            |
+| Register new user<br/>(t@jwt.com, pw: test)         |   register.tsx         |  [POST] /api/auth     |   `INSERT INTO user (name, email, password) VALUES (?, ?, ?)` <br/>`INSERT INTO userRole (userId, role, objectId) VALUES (?, ?, ?)`           |
+| Login new user<br/>(t@jwt.com, pw: test)            |   login.tsx          |     [PUT] /api/auth       |   `SELECT * FROM user WHERE email=?` <br/>`SELECT * FROM userRole WHERE userId=?` <br/>`INSERT INTO auth (token, userId) VALUES (?, ?) ON DUPLICATE KEY UPDATE token=token`           |
 | Order pizza                                         |                    |                   |              |
 | Verify pizza                                        |                    |                   |              |
 | View profile page                                   |                    |                   |              |
