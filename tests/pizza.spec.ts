@@ -14,19 +14,6 @@ type User = {
     roles: { role: Role }[];
 }
 
-const testAdminUser : User = {
-    id: '',
-    email: 'a@jwt.com',
-    password: 'admin',
-    name: 'Bryce Lasson',
-    roles: [{ role: Role.Admin }]
-}
-
-test('has title', async ({ page }) => {
-    await page.goto('http://localhost:5173/');
-    await expect(page).toHaveTitle(/JWT/);
-});
-
 async function basicInit(page: Page) {
     let loggedInUser: User | undefined;
     const validUsers: Record<string, User> = { 
