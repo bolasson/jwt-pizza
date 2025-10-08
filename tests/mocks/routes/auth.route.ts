@@ -6,20 +6,34 @@ export async function mockAuthAndUserRoutes(page: Page) {
     let loggedInUser: User | undefined;
 
     await page.route('*/**/api/auth', async (route) => {
-        const loginReq = route.request().postDataJSON();
-        const user = validUsers[loginReq.email];
+        const method = route.request().method();
 
-        if (!user || user.password !== loginReq.password) {
-            await route.fulfill({ status: 401, json: { error: 'Unauthorized' } });
+        if (method === 'PUT') {
+            const loginReq = route.request().postDataJSON();
+            const user = validUsers[loginReq.email];
+
+            if (!user || user.password !== loginReq.password) {
+                await route.fulfill({ status: 401, json: { error: 'Unauthorized' } });
+                return;
+            }
+
+            loggedInUser = user;
+            expect(method).toBe('PUT');
+
+            await route.fulfill({
+                status: 200,
+                json: { user: loggedInUser, token: 'atotallylegitimatetoken' },
+            });
             return;
         }
 
-        loggedInUser = user;
-        expect(route.request().method()).toBe('PUT');
+        if (method === 'DELETE') {
+            loggedInUser = undefined;
+            await route.fulfill({ status: 200, json: { success: true } });
+            return;
+        }
 
-        await route.fulfill({
-            json: { user: loggedInUser, token: 'abcdef' },
-        });
+        await route.fulfill({ status: 405, json: { error: 'Method Not Allowed' } });
     });
 
     await page.route('*/**/api/user/me', async (route) => {
