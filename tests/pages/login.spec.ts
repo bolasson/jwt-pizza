@@ -41,3 +41,26 @@ test('login with bad credentials', async ({ page }) => {
 
     await expect(page.getByText(/"code":401/i)).toBeVisible();
 });
+
+test('register', async ({ page }) => {
+    await page.getByRole('link', { name: 'Register' }).click();
+    await page.getByPlaceholder('Full name').fill('Papa John');
+    await page.getByPlaceholder('Email address').fill('bea@test.com');
+    await page.getByPlaceholder('Password').fill('toomanysecretsmakeoneparanoid');
+    await page.getByRole('button', { name: 'Register' }).click();
+
+    await expect(page.getByRole('link', { name: 'PJ' })).toBeVisible();
+});
+
+test('register with existing email', async ({ page }) => {
+    await page.getByRole('link', { name: 'Register' }).click();
+
+    await page.getByPlaceholder('Full name').fill('Someone Who Already Exists');
+    await page.getByPlaceholder('Email address').fill('d@jwt.com');
+    await page.getByPlaceholder('Password').fill('toomanysecretsmakeoneparanoid');
+    await page.getByRole('button', { name: 'Register' }).click();
+
+    await expect(page.getByText('"code":409')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Login' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'PJ' })).toHaveCount(0);
+});

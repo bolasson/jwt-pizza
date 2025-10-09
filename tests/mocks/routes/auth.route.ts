@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import { expect } from 'playwright-test-coverage';
-import { validUsers, type User } from '../data/users.data';
+import { Role, validUsers, type User } from '../data/users.data';
 
 export async function mockAuthAndUserRoutes(page: Page) {
     let loggedInUser: User | undefined;
@@ -22,6 +22,35 @@ export async function mockAuthAndUserRoutes(page: Page) {
 
             await route.fulfill({
                 status: 200,
+                json: { user: loggedInUser, token: 'atotallylegitimatetoken' },
+            });
+            return;
+        }
+
+        if (method === 'POST') {
+            const { name, email, password } = route.request().postDataJSON() ?? {};
+            if (!name || !email || !password) {
+                await route.fulfill({ status: 400, json: { error: 'Missing fields' } });
+                return;
+            }
+
+            if (validUsers[email]) {
+                await route.fulfill({ status: 409, json: { error: 'Email already registered' } });
+                return;
+            }
+
+            const newUser: User = {
+                id: String(Object.keys(validUsers).length + 1),
+                name,
+                email,
+                password,
+                roles: [{ role: Role.Diner }],
+            };
+            validUsers[email] = newUser;
+            loggedInUser = newUser;
+
+            await route.fulfill({
+                status: 201,
                 json: { user: loggedInUser, token: 'atotallylegitimatetoken' },
             });
             return;
