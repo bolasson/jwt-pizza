@@ -32,3 +32,10 @@ test('purchase menu item', async ({ page }) => {
     // Check balance
     await expect(page.getByText('0.008')).toBeVisible();
 });
+
+test('menu wobble animation', async ({ page }) => {
+    await page.getByRole('button', { name: 'Order now' }).click();
+    await page.getByRole('link', { name: 'Image Description Veggie A' }).click();
+    await page.waitForTimeout(500);
+    await expect(page.getByRole('link', { name: 'Image Description Veggie A' })).not.toHaveClass(/animate-wobble/);
+});

@@ -55,7 +55,7 @@ export default function Menu() {
           </div>
 
           <div className="text-yellow-200">{order.items.length > 0 ? 'Selected pizzas: ' + order.items.length : 'What are you waiting for? Pick a store and then add some pizzas!'}</div>
-          <Button title="Checkout" submit disabled={!selectedStore || order.items.length <= 0} className="disabled:bg-neutral-500 disabled:text-neutral-700" onPress={() => {}} />
+          <Button title="Checkout" submit disabled={!selectedStore || order.items.length <= 0} className="disabled:bg-neutral-500 disabled:text-neutral-700" onPress={() => { }} />
 
           <div className="m-4 grid gap-x-8 gap-y-4 sm:gird-cols-1 md:grid-cols-2 lg:grid-cols-4 xlg:grid-cols-5">
             {menu.map((pizza) => (
