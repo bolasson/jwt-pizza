@@ -69,4 +69,53 @@ export async function mockAuthAndUserRoutes(page: Page) {
         expect(route.request().method()).toBe('GET');
         await route.fulfill({ json: loggedInUser });
     });
+
+    await page.route('**/api/user/**', async (route) => {
+        const method = route.request().method();
+        if (method !== 'PUT') {
+            await route.continue();
+            return;
+        }
+
+        if (!loggedInUser) {
+            await route.fulfill({ status: 401, json: { message: 'unauthorized' } });
+            return;
+        }
+
+        const url = new URL(route.request().url());
+        const lastSeg = url.pathname.split('/').filter(Boolean).pop();
+        const userIdFromPath = lastSeg ?? '';
+        const body = route.request().postDataJSON() as Partial<Pick<User, 'name' | 'email' | 'password'>>;
+
+        const targetUser = Object.values(validUsers).find((u) => String(u.id) === userIdFromPath);
+        if (!targetUser) {
+            await route.fulfill({ status: 404, json: { message: 'not found' } });
+            return;
+        }
+
+        const isSelf = String(loggedInUser.id) === userIdFromPath;
+        const isAdmin = loggedInUser.roles?.some((r) => r.role === Role.Admin);
+        if (!isSelf && !isAdmin) {
+            await route.fulfill({ status: 403, json: { message: 'unauthorized' } });
+            return;
+        }
+
+        if (typeof body.name === 'string') targetUser.name = body.name;
+        if (typeof body.password === 'string' && body.password.length) targetUser.password = body.password;
+        if (typeof body.email === 'string' && body.email !== targetUser.email) {
+            const oldEmail = targetUser.email;
+            (validUsers as any)[body.email] = { ...targetUser, email: body.email };
+            delete (validUsers as any)[oldEmail];
+        }
+
+        const updated = Object.values(validUsers).find((u) => String(u.id) === userIdFromPath)!;
+        if (isSelf) {
+            loggedInUser = { ...updated, password: '' };
+        }
+
+        const responseUser = { ...updated, password: '' };
+        const mockNewToken = 'tttttt';
+        await route.fulfill({ status: 200, json: { user: responseUser, token: mockNewToken } });
+    });
+
 }
