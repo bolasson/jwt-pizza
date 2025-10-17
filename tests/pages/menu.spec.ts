@@ -13,6 +13,7 @@ test.describe('login and purchase menu item', () => {
     });
 
     test('purchase menu item', async ({ page }) => {
+        test.setTimeout(10000);
         // Go to order page
         await page.getByRole('button', { name: 'Order now' }).click();
 
