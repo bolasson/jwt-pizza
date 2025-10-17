@@ -24,6 +24,11 @@ export async function mockAuthAndUserRoutes(page: Page) {
                 status: 200,
                 json: { user: loggedInUser, token: 'atotallylegitimatetoken' },
             });
+
+            await page.evaluate(() => {
+                localStorage.setItem('token', 'atotallylegitimatetoken');
+            });
+
             return;
         }
 
@@ -53,11 +58,19 @@ export async function mockAuthAndUserRoutes(page: Page) {
                 status: 201,
                 json: { user: loggedInUser, token: 'atotallylegitimatetoken' },
             });
+
+            await page.evaluate(() => {
+                localStorage.setItem('token', 'atotallylegitimatetoken');
+            });
+
             return;
         }
 
         if (method === 'DELETE') {
             loggedInUser = undefined;
+            await page.evaluate(() => {
+                localStorage.removeItem('token');
+            });
             await route.fulfill({ status: 200, json: { success: true } });
             return;
         }

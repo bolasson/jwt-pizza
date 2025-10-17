@@ -15,6 +15,10 @@ export function useGeneralMocks(t = base) {
             ]);
             await page.goto('/');
             await use(page);
+
+            await page.evaluate(() => {
+                localStorage.removeItem('token');
+            });
         },
     });
 }
