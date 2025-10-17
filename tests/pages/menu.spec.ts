@@ -16,7 +16,6 @@ test('add menu items', async ({ page }) => {
     await page.getByRole('button', { name: 'Checkout' }).click();
 });
 
-
 test('menu wobble animation', async ({ page }) => {
     await page.getByRole('button', { name: 'Order now' }).click();
     await page.getByRole('link', { name: 'Image Description Veggie A' }).click();

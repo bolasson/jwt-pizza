@@ -76,6 +76,16 @@ class HttpPizzaService implements PizzaService {
     return Promise.resolve(user);
   }
 
+  async listUsers(page: number, limit: number, name = '*') {
+    const q = new URLSearchParams({ page: String(page), limit: String(limit), name });
+    const res = await this.callEndpoint(`/api/user?${q.toString()}`);
+    return {
+      users: (res.users || []).map((u: any) => ({ ...u, id: String(u.id) })),
+      more: !!res.more,
+    };
+  }
+
+
   async getMenu(): Promise<Menu> {
     return this.callEndpoint('/api/order/menu');
   }

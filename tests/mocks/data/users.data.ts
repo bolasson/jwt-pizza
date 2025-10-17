@@ -19,4 +19,11 @@ export const validUsers: Record<string, User> = {
         password: 'a',
         roles: [{ role: Role.Diner }],
     },
+    'a@jwt.com': {
+        id: '1',
+        name: 'Papa John',
+        email: 'a@jwt.com',
+        password: 'a',
+        roles: [{ role: Role.Admin }],
+    },
 };

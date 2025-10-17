@@ -16,12 +16,23 @@ export default function AdminDashboard(props: Props) {
   const [franchiseList, setFranchiseList] = React.useState<FranchiseList>({ franchises: [], more: false });
   const [franchisePage, setFranchisePage] = React.useState(0);
   const filterFranchiseRef = React.useRef<HTMLInputElement>(null);
+  const [usersList, setUsersList] = React.useState<{ users: User[]; more: boolean }>({ users: [], more: false });
+  const [usersPage, setUsersPage] = React.useState(1);
+  const filterUserRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     (async () => {
       setFranchiseList(await pizzaService.getFranchises(franchisePage, 3, '*'));
     })();
   }, [props.user, franchisePage]);
+
+  React.useEffect(() => {
+    (async () => {
+      if (Role.isRole(props.user, Role.Admin)) {
+        setUsersList(await pizzaService.listUsers(usersPage, 10, '*'));
+      }
+    })();
+  }, [props.user, usersPage]);
 
   function createFranchise() {
     navigate('/admin-dashboard/create-franchise');
@@ -37,6 +48,13 @@ export default function AdminDashboard(props: Props) {
 
   async function filterFranchises() {
     setFranchiseList(await pizzaService.getFranchises(franchisePage, 10, `*${filterFranchiseRef.current?.value}*`));
+  }
+
+  async function filterUsers() {
+    const q = (filterUserRef.current?.value || '').trim();
+    const pattern = q ? `*${q}*` : '*';
+    setUsersPage(1);
+    setUsersList(await pizzaService.listUsers(1, 10, pattern));
   }
 
   let response = <NotFound />;
@@ -122,6 +140,91 @@ export default function AdminDashboard(props: Props) {
         </div>
         <div>
           <Button className="w-36 text-xs sm:text-sm sm:w-64" title="Add Franchise" onPress={createFranchise} />
+        </div>
+        <div className="text-start py-8 px-4 sm:px-6 lg:px-8">
+          <h3 className="text-neutral-100 text-xl">Users</h3>
+          <div className="bg-neutral-100 overflow-clip my-4">
+            <div className="flex flex-col">
+              <div className="-m-1.5 overflow-x-auto">
+                <div className="p-1.5 min-w-full inline-block align-middle">
+                  <div className="overflow-hidden">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="uppercase text-neutral-100 bg-slate-400 border-b-2 border-gray-500">
+                        <tr>
+                          {['Name', 'Email', 'Roles'].map((header) => (
+                            <th key={header} scope="col" className="px-6 py-3 text-center text-xs font-medium">
+                              {header}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {usersList.users.length === 0 ? (
+                          <tr>
+                            <td className="px-2 py-3 text-center text-sm text-gray-600" colSpan={3}>
+                              No users found.
+                            </td>
+                          </tr>
+                        ) : (
+                          usersList.users.map((u) => (
+                            <tr key={u.id} className="bg-neutral-100">
+                              <td className="text-start px-2 whitespace-nowrap text-sm text-gray-800">{u.name}</td>
+                              <td className="text-start px-2 whitespace-nowrap text-sm text-gray-800">{u.email}</td>
+                              <td className="text-start px-2 whitespace-nowrap text-sm text-gray-800">
+                                {u.roles?.map((r) => r.role).join(', ')}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <td className="px-1 py-1">
+                            <input
+                              type="text"
+                              ref={filterUserRef}
+                              name="filterUsers"
+                              placeholder="Filter users"
+                              className="px-2 py-1 text-sm border border-gray-300 rounded-lg"
+                              aria-label="Filter users by name"
+                            />
+                            <button
+                              type="submit"
+                              className="ml-2 px-2 py-1 text-sm font-semibold rounded-lg border border-orange-400 text-orange-400 hover:border-orange-800 hover:text-orange-800"
+                              onClick={filterUsers}
+                            >
+                              Submit
+                            </button>
+                          </td>
+                          <td colSpan={2} className="text-end text-sm font-medium">
+                            <button
+                              className="w-12 p-1 text-sm font-semibold rounded-lg border border-transparent bg-white text-grey border-grey m-1 hover:bg-orange-200 disabled:bg-neutral-300"
+                              onClick={() => setUsersPage((p) => Math.max(1, p - 1))}
+                              disabled={usersPage <= 1}
+                              aria-label="Prev users page"
+                            >
+                              «
+                            </button>
+                            <span aria-label="Users page" className="mx-1 align-middle">
+                              {usersPage}
+                            </span>
+                            <button
+                              className="w-12 p-1 text-sm font-semibold rounded-lg border border-transparent bg-white text-grey border-grey m-1 hover:bg-orange-200 disabled:bg-neutral-300"
+                              onClick={() => setUsersPage((p) => p + 1)}
+                              disabled={!usersList.more}
+                              aria-label="Next users page"
+                            >
+                              »
+                            </button>
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </View>
     );
