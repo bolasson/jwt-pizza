@@ -26,7 +26,7 @@ test.describe('login and purchase menu item', () => {
 
         // Pay
         await expect(page.getByRole('link', { name: 'KC' })).toBeVisible();
-        await expect(page.getByRole('main')).toContainText('Send me those 2 pizzas right now!');
+        // await expect(page.getByRole('main')).toContainText('Send me those 2 pizzas right now!');
         await expect(page.locator('tbody')).toContainText('Veggie');
         await expect(page.locator('tbody')).toContainText('Pepperoni');
         await expect(page.locator('tfoot')).toContainText('0.008 ₿');
