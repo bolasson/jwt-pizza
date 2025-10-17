@@ -47,3 +47,44 @@ test('list and filter users as admin', async ({ page }) => {
     await expect(usersTable).toContainText('Kai Chen');
     await expect(usersTable).not.toContainText('Papa John');
 });
+
+test('delete user', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('token', 'fake-admin-token'));
+    await page.route('**/api/user/me', async (route) => {
+        await route.fulfill({
+            json: { id: 1, name: 'Admin', email: 'admin@jwt.com', roles: [{ role: 'admin' }] },
+        });
+    });
+
+    await page.route('**/api/franchise**', async (route) => {
+        await route.fulfill({ json: { franchises: [], more: false } });
+    });
+
+    let deleted = false;
+    const deleteableDiner = { id: 123, name: 'deleteable diner', email: 'deleteableDiner@test.com', roles: [{ role: 'diner' }] };
+
+    await page.route('**/api/user?**', async (route) => {
+        const data = deleted
+            ? { users: [], more: false }
+            : { users: [deleteableDiner], more: false };
+        await route.fulfill({ json: data });
+    });
+
+    await page.route('**/api/user/123', async (route) => {
+        if (route.request().method() === 'DELETE') {
+            deleted = true;
+            await route.fulfill({ status: 204, body: '' });
+        } else {
+            await route.continue();
+        }
+    });
+
+    await page.goto('/admin-dashboard');
+
+    await expect(page.getByRole('table').nth(1)).toContainText('deleteableDiner@test.com');
+    page.once('dialog', (d) => d.accept());
+
+    const row = page.getByRole('row', { name: /deleteableDiner@test\.com/ });
+    await row.getByRole('button', { name: 'Delete' }).click();
+    await expect(page.getByRole('table').nth(1)).toContainText('No users found.');
+});
