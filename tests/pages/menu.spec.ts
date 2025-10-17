@@ -4,16 +4,8 @@ import { useGeneralMocks } from '../fixtures/base.fixture';
 const test = useGeneralMocks();
 
 test.describe('login and purchase menu item', () => {
-    test.beforeEach(async ({ page }) => {
-        await page.getByRole('link', { name: 'Login' }).click();
-        await page.getByPlaceholder('Email address').fill('d@jwt.com');
-        await page.getByPlaceholder('Password').fill('a');
-        await page.getByRole('button', { name: 'Login' }).click();
-        await expect(page.getByRole('link', { name: 'KC' })).toBeVisible();
-    });
-
     test('purchase menu item', async ({ page }) => {
-        test.setTimeout(10000);
+        test.setTimeout(15000);
         // Go to order page
         await page.getByRole('button', { name: 'Order now' }).click();
 
@@ -24,6 +16,11 @@ test.describe('login and purchase menu item', () => {
         await page.getByRole('link', { name: 'Image Description Pepperoni' }).click();
         await expect(page.locator('form')).toContainText('Selected pizzas: 2');
         await page.getByRole('button', { name: 'Checkout' }).click();
+
+        await page.getByPlaceholder('Email address').fill('d@jwt.com');
+        await page.getByPlaceholder('Password').fill('a');
+        await page.getByRole('button', { name: 'Login' }).click();
+        await expect(page.getByRole('link', { name: 'KC' })).toBeVisible();
 
         // Pay
         await expect(page.getByRole('main')).toContainText('Send me those 2 pizzas right now!');
