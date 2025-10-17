@@ -18,9 +18,9 @@ test('purchase menu item', async ({ page }) => {
     // Login
     await page.getByPlaceholder('Email address').click();
     await page.getByPlaceholder('Email address').fill('d@jwt.com');
-    await page.getByPlaceholder('Email address').press('Tab');
     await page.getByPlaceholder('Password').fill('a');
     await page.getByRole('button', { name: 'Login' }).click();
+    await expect(page.getByRole('link', { name: 'KC' })).toBeVisible();
 
     // Pay
     await expect(page.getByRole('main')).toContainText('Send me those 2 pizzas right now!');
